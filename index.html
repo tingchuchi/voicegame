@@ -1,0 +1,2446 @@
+<html lang="zh-TW">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>音準遊戲</title>
+
+    <!-- Tailwind CSS CDN -->
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome for icons -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+
+        body {
+
+            font-family: 'Inter', sans-serif;
+
+            background: linear-gradient(135deg, #a8c0ff, #3f2b96); /* Gradient background */
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            min-height: 100vh;
+
+            margin: 0;
+
+            padding: 20px;
+
+            box-sizing: border-box;
+
+            color: #fff;
+
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+
+        }
+
+        .game-container {
+
+            background-color: rgba(255, 255, 255, 0.15); /* Semi-transparent white */
+
+            border-radius: 20px;
+
+            padding: 30px;
+
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+
+            text-align: center;
+
+            max-width: 600px;
+
+            width: 100%;
+
+            border: 1px solid rgba(255, 255, 255, 0.3);
+
+            backdrop-filter: blur(10px); /* Frosted glass effect */
+
+        }
+
+        .btn {
+
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); /* Gradient button */
+
+            color: white;
+
+            padding: 12px 25px;
+
+            border-radius: 10px;
+
+            cursor: pointer;
+
+            transition: all 0.3s ease;
+
+            border: none;
+
+            font-weight: bold;
+
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+
+        }
+
+        .btn:hover {
+
+            transform: translateY(-3px);
+
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+
+            background: linear-gradient(135deg, #2575fc 0%, #6a11cb 100%);
+
+        }
+
+        .btn:disabled {
+
+            background: #ccc;
+
+            cursor: not-allowed;
+
+            opacity: 0.7;
+
+            transform: none;
+
+            box-shadow: none;
+
+        }
+
+        .progress-bar-container {
+
+            width: 100%;
+
+            background-color: rgba(255, 255, 255, 0.2);
+
+            border-radius: 10px;
+
+            overflow: hidden;
+
+            height: 20px;
+
+            margin-top: 20px;
+
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+
+        }
+
+        .progress-bar {
+
+            height: 100%;
+
+            width: 0%;
+
+            background: linear-gradient(90deg, #ff7e5f, #feb47b); /* Progress bar gradient */
+
+            border-radius: 10px;
+
+            transition: width 0.5s ease-in-out;
+
+        }
+
+        .note-display {
+
+            font-size: 4rem;
+
+            font-weight: bold;
+
+            margin: 30px 0;
+
+            color: #fff;
+
+            animation: pulse 1.5s infinite alternate; /* Pulsing animation for note */
+
+        }
+
+        @keyframes pulse {
+
+            0% { transform: scale(1); text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+
+            100% { transform: scale(1.05); text-shadow: 0 0 20px rgba(255,255,255,0.8); }
+
+        }
+
+        .feedback-message {
+
+            font-size: 1.5rem;
+
+            margin-top: 20px;
+
+            font-weight: bold;
+
+        }
+
+        .feedback-success {
+
+            color: #4CAF50; /* Green */
+
+        }
+
+        .feedback-fail {
+
+            color: #F44336; /* Red */
+
+        }
+
+        .guess-options button {
+
+            width: 100%;
+
+            margin-bottom: 10px;
+
+            font-size: 1.2rem;
+
+        }
+
+
+
+        /* Modal styling */
+
+        .modal {
+
+            position: fixed;
+
+            top: 0;
+
+            left: 0;
+
+            width: 100%;
+
+            height: 100%;
+
+            background-color: rgba(0, 0, 0, 0.7);
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            z-index: 1000;
+
+        }
+
+        .modal-content {
+
+            background: linear-gradient(135deg, #4CAF50, #8BC34A); /* Green gradient */
+
+            color: white;
+
+            padding: 30px;
+
+            border-radius: 20px;
+
+            text-align: center;
+
+            max-width: 400px;
+
+            width: 90%;
+
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+
+            animation: fadeIn 0.3s ease-out;
+
+        }
+
+        .modal-fail .modal-content {
+
+            background: linear-gradient(135deg, #F44336, #FF9800); /* Red gradient */
+
+        }
+
+        @keyframes fadeIn {
+
+            from { opacity: 0; transform: scale(0.9); }
+
+            to { opacity: 1; transform: scale(1); }
+
+        }
+
+        .ai-feedback-area { /* Kept for general styling, but removed functionality */
+
+            background-color: rgba(0, 0, 0, 0.2);
+
+            padding: 15px;
+
+            border-radius: 10px;
+
+            margin-top: 20px;
+
+            min-height: 50px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 1rem;
+
+            color: #eee;
+
+        }
+
+        .countdown-display {
+
+            font-size: 2.5rem;
+
+            font-weight: bold;
+
+            color: #ffeb3b; /* Yellow for countdown */
+
+            margin-top: 15px;
+
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+
+        }
+
+        .volume-meter-container {
+
+            width: 100%;
+
+            height: 20px;
+
+            background-color: rgba(255, 255, 255, 0.3);
+
+            border-radius: 10px;
+
+            overflow: hidden;
+
+            margin-top: 15px;
+
+            border: 1px solid rgba(255, 255, 255, 0.5);
+
+        }
+
+        .volume-bar {
+
+            height: 100%;
+
+            width: 0%;
+
+            background: linear-gradient(90deg, #4CAF50, #8BC34A); /* Green gradient for volume */
+
+            border-radius: 10px;
+
+            transition: width 0.1s ease-out; /* Smooth transition for volume changes */
+
+        }
+
+        /* Pitch Indicator Styles */
+
+        .pitch-indicator-container {
+
+            width: 100%;
+
+            height: 15px;
+
+            background: linear-gradient(to right, #f44336, #ffeb3b, #4CAF50, #ffeb3b, #f44336); /* Red-Yellow-Green-Yellow-Red */
+
+            border-radius: 10px;
+
+            margin-top: 15px;
+
+            position: relative;
+
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+
+            overflow: hidden; /* Ensure marker stays within bounds */
+
+        }
+
+        .pitch-marker {
+
+            position: absolute;
+
+            top: 0;
+
+            left: 50%; /* Start in the middle */
+
+            transform: translateX(-50%); /* Center the marker */
+
+            width: 8px;
+
+            height: 100%;
+
+            background-color: #fff; /* White marker */
+
+            border-radius: 2px;
+
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+
+            transition: left 0.05s linear; /* Smooth movement */
+
+            z-index: 1; /* Ensure it's above the gradient */
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="game-container">
+
+        <h1 class="text-4xl font-extrabold mb-8">音準遊戲</h1>
+
+
+
+        <!-- Start Screen -->
+
+        <div id="start-screen" class="p-4">
+
+            <div class="mb-6">
+
+                <label class="block text-xl font-semibold mb-3">選擇難易度 (遊戲模式):</label>
+
+                <div class="flex flex-col space-y-3">
+
+                    <label class="inline-flex items-center">
+
+                        <input type="radio" name="difficulty" value="easy" class="form-radio text-blue-600 h-5 w-5" checked>
+
+                        <span class="ml-2 text-lg">簡單 (較寬容的音高範圍)</span>
+
+                    </label>
+
+                    <label class="inline-flex items-center">
+
+                        <input type="radio" name="difficulty" value="medium" class="form-radio text-purple-600 h-5 w-5">
+
+                        <span class="ml-2 text-lg">中等 (適度的音高範圍)</span>
+
+                    </label>
+
+                    <label class="inline-flex items-center">
+
+                        <input type="radio" name="difficulty" value="hard" class="form-radio text-red-600 h-5 w-5">
+
+                        <span class="ml-2 text-lg">困難 (嚴格的音高範圍)</span>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="mb-8">
+
+                <label class="inline-flex items-center">
+
+                    <input type="checkbox" id="guess-mode-toggle" class="form-checkbox text-green-600 h-5 w-5">
+
+                    <span class="ml-2 text-lg">啟用猜音高模式 (遊戲模式下沒有麥克風)</span>
+
+                </label>
+
+            </div>
+
+
+
+            <button id="start-game-btn" class="btn">開始遊戲</button>
+
+            <button id="start-tuner-btn" class="btn mt-4">啟動調音器</button> <!-- New Tuner Mode Button -->
+
+            <p id="mic-status" class="text-sm mt-4 text-yellow-300 hidden"><i class="fas fa-exclamation-triangle"></i> 麥克風權限待確認或未獲取。</p>
+
+            <p class="text-sm mt-4 text-gray-300">作者: 亭竹</p> <!-- Author info -->
+
+        </div>
+
+
+
+        <!-- Game Screen -->
+
+        <div id="game-screen" class="p-4 hidden">
+
+            <p class="text-xl font-semibold mb-4"><span id="mode-display"></span> <span id="current-level-text"></span></p>
+
+            <div class="progress-bar-container mb-6">
+
+                <div id="progress-bar" class="progress-bar"></div>
+
+            </div>
+
+
+
+            <p class="text-2xl font-bold mb-4" id="target-note-label">目標音高:</p>
+
+            <div id="target-note" class="note-display"></div>
+
+
+
+            <button id="play-note-btn" class="btn mb-4"><i class="fas fa-play"></i> 播放目標音高</button>
+
+
+
+            <!-- Countdown Display -->
+
+            <div id="countdown-display" class="countdown-display hidden"></div> <!-- Initial value set by JS -->
+
+
+
+            <!-- Microphone Input Area -->
+
+            <div id="mic-input-area">
+
+                <p class="text-2xl font-bold mb-2">您正在唱:</p>
+
+                <div id="detected-note" class="note-display text-gray-300">--</div>
+
+                <!-- Volume Meter -->
+
+                <div id="volume-meter" class="volume-meter-container hidden">
+
+                    <div id="volume-bar" class="volume-bar"></div>
+
+                </div>
+
+                <!-- Pitch Indicator -->
+
+                <div id="pitch-indicator-container" class="pitch-indicator-container hidden">
+
+                    <div id="pitch-marker" class="pitch-marker"></div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Guess Mode Area -->
+
+            <div id="guess-mode-area" class="hidden guess-options grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+
+                <button class="btn guess-option-btn" data-midi-note="0"></button>
+
+                <button class="btn guess-option-btn" data-midi-note="0"></button>
+
+                <button class="btn guess-option-btn" data-midi-note="0"></button>
+
+            </div>
+
+
+
+            <p id="feedback-message" class="feedback-message mt-6"></p>
+
+            <button id="return-to-main-btn" class="btn mt-6 hidden">返回主頁</button> <!-- New Return button for Tuner Mode -->
+
+        </div>
+
+
+
+        <!-- End Screen -->
+
+        <div id="end-screen" class="p-4 hidden">
+
+            <h2 class="text-3xl font-extrabold mb-6">遊戲結束！</h2>
+
+            <p class="text-2xl mb-8">您的分數: <span id="final-score" class="font-bold">0</span> / 10</p>
+
+            <button id="restart-game-btn" class="btn">重新開始</button>
+
+            <button id="return-from-end-btn" class="btn mt-4">返回主頁</button>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Modals -->
+
+    <div id="pass-modal" class="modal hidden">
+
+        <div class="modal-content">
+
+            <i class="fas fa-check-circle text-6xl mb-4"></i>
+
+            <h3 class="text-3xl font-bold mb-2">太棒了！</h3>
+
+            <p class="text-xl mb-4">您通過了這一關！</p>
+
+            <button id="next-level-pass-modal-btn" class="btn">下一關</button> <!-- Changed ID -->
+
+        </div>
+
+    </div>
+
+
+
+    <div id="fail-modal" class="modal hidden modal-fail">
+
+        <div class="modal-content">
+
+            <i class="fas fa-times-circle text-6xl mb-4"></i>
+
+            <h3 class="text-3xl font-bold mb-2">喔不！</h3>
+
+            <p class="text-xl mb-4">挑戰失敗。</p> <!-- Removed "請再試一次" -->
+
+            <button id="next-level-fail-modal-btn" class="btn">下一關</button> <!-- Changed ID and text -->
+
+        </div>
+
+    </div>
+
+
+
+    <script type="module">
+
+        // Firebase imports
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // No Firestore needed for this app as no persistence is required.
+
+
+
+        // Firebase Initialization (boilerplate)
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+
+
+
+        let app;
+
+        let auth;
+
+        // userId is no longer displayed, but Firebase auth is still initialized for environment consistency.
+
+
+
+        // --- Game Logic Variables ---
+
+        // Moved all game logic variables to the top for clarity and to prevent ReferenceErrors.
+
+        let audioContext;
+
+        let analyser;
+
+        let microphone;
+
+        let scriptProcessor;
+
+        let targetMidiNote;
+
+        let countdownTimer;
+
+        let countdownValue;
+
+        let currentLevel = 0;
+
+        let score = 0;
+
+        let difficultyTolerance = {
+
+            easy: 0.5,   // +/- 0.5 semitones
+
+            medium: 0.25, // +/- 0.25 semitones
+
+            hard: 0.22    // Changed to 0.22 for a slightly simpler hard mode, closer to medium
+
+        };
+
+        let difficultyCountdown = { // Countdown times based on difficulty
+
+            easy: 6,
+
+            medium: 5,
+
+            hard: 2
+
+        };
+
+        let currentTolerance;
+
+        let guessMode = false; // True if in guess mode, false if in mic mode (for game)
+
+        let gameRunning = false; // True if a game level is active
+
+        let tunerModeActive = false; // True if in tuner mode
+
+        let activeOscillators = []; // To hold multiple oscillators for piano-like sound
+
+
+
+
+
+        // Initialize Firebase and authenticate
+
+        try {
+
+            app = initializeApp(firebaseConfig);
+
+            auth = getAuth(app);
+
+
+
+            // Listen for auth state changes (though userId is not displayed)
+
+            onAuthStateChanged(auth, async (user) => {
+
+                if (!user) {
+
+                    await signInAnonymously(auth).catch(error => {
+
+                        console.error("Firebase anonymous sign-in failed during onAuthStateChanged:", error);
+
+                    });
+
+                }
+
+            });
+
+
+
+            // Initial sign-in attempt: Prioritize custom token if available.
+
+            // This error (auth/invalid-claims) is often expected if the provided custom token is not valid in this environment,
+
+            // and the app correctly falls back to anonymous sign-in. It's not a critical application error.
+
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+
+                signInWithCustomToken(auth, __initial_auth_token).catch(error => {
+
+                    console.error("Firebase custom token sign-in failed (might be invalid or expired, continuing with anonymous user):", error);
+
+                });
+
+            } else {
+
+                 signInAnonymously(auth).catch(error => {
+
+                    console.error("Firebase anonymous sign-in failed (no custom token provided):", error);
+
+                 });
+
+            }
+
+
+
+        } catch (error) {
+
+            console.error("Failed to initialize Firebase:", error);
+
+        }
+
+
+
+        // --- DOM Elements ---
+
+        const startScreen = document.getElementById('start-screen');
+
+        const gameScreen = document.getElementById('game-screen');
+
+        const endScreen = document.getElementById('end-screen');
+
+        const startGameBtn = document.getElementById('start-game-btn');
+
+        const startTunerBtn = document.getElementById('start-tuner-btn'); // New Tuner button
+
+        const restartGameBtn = document.getElementById('restart-game-btn');
+
+        const returnFromEndBtn = document.getElementById('return-from-end-btn'); // New button to return from end screen
+
+        const guessModeToggle = document.getElementById('guess-mode-toggle');
+
+        const micInputArea = document.getElementById('mic-input-area');
+
+        const guessModeArea = document.getElementById('guess-mode-area');
+
+        const playNoteBtn = document.getElementById('play-note-btn');
+
+        const currentLevelText = document.getElementById('current-level-text'); // Renamed current-level to current-level-text
+
+        const modeDisplay = document.getElementById('mode-display'); // To show "遊戲模式" or "調音器模式"
+
+        const progressBar = document.getElementById('progress-bar');
+
+        const targetNoteDisplay = document.getElementById('target-note');
+
+        const targetNoteLabel = document.getElementById('target-note-label');
+
+        const detectedNoteDisplay = document.getElementById('detected-note');
+
+        const feedbackMessage = document.getElementById('feedback-message');
+
+        const finalScoreDisplay = document.getElementById('final-score');
+
+        const micStatusDisplay = document.getElementById('mic-status');
+
+        const countdownDisplay = document.getElementById('countdown-display'); // Countdown element
+
+        const volumeMeter = document.getElementById('volume-meter'); // Volume meter container
+
+        const volumeBar = document.getElementById('volume-bar');     // Volume bar itself
+
+        const pitchIndicatorContainer = document.getElementById('pitch-indicator-container'); // Pitch indicator container
+
+        const pitchMarker = document.getElementById('pitch-marker'); // Pitch marker
+
+        const returnToMainBtn = document.getElementById('return-to-main-btn'); // New Return button for Tuner Mode
+
+
+
+        const passModal = document.getElementById('pass-modal');
+
+        const failModal = document.getElementById('fail-modal');
+
+        const nextLevelPassModalBtn = document.getElementById('next-level-pass-modal-btn'); // Renamed
+
+        const nextLevelFailModalBtn = document.getElementById('next-level-fail-modal-btn'); // Renamed
+
+
+
+        // AI feedback elements (removed functionality, kept for reference if needed for layout)
+
+        // const passAiFeedbackArea = document.getElementById('pass-ai-feedback-area'); // Already removed from DOM in previous update
+
+        // const failAiFeedbackArea = document.getElementById('fail-ai-feedback-area'); // Already removed from DOM in previous update
+
+
+
+
+
+        // --- Utility Functions ---
+
+
+
+        /**
+
+         * Converts MIDI note number to frequency (Hz).
+
+         * @param {number} midiNote - MIDI note number (e.g., 60 for C4, 69 for A4).
+
+         * @returns {number} Frequency in Hz.
+
+         */
+
+        function midiToFreq(midiNote) {
+
+            return 440 * Math.pow(2, (midiNote - 69) / 12);
+
+        }
+
+
+
+        /**
+
+         * Converts frequency (Hz) to the nearest MIDI note number.
+
+         * @param {number} frequency - Frequency in Hz.
+
+         * @returns {number} Nearest MIDI note number.
+
+         */
+
+        function freqToMidi(frequency) {
+
+            if (frequency <= 0) return 0; // Avoid log(0)
+
+            return 12 * (Math.log(frequency / 440) / Math.log(2)) + 69;
+
+        }
+
+
+
+        /**
+
+         * Converts MIDI note number to a musical note string (e.g., "C4", "G#3").
+
+         * Ensures that the MIDI note is rounded to the nearest integer before conversion to avoid fractional notes.
+
+         * @param {number} midiNote - MIDI note number.
+
+         * @returns {string} Musical note string.
+
+         */
+
+        function midiNoteToName(midiNote) {
+
+            const noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+
+            const roundedMidiNote = Math.round(midiNote); // Round to nearest integer for display
+
+            // Handle edge cases for octaves that might go out of standard range for display
+
+            let octave = Math.floor(roundedMidiNote / 12) - 1; // MIDI 0 = C-1
+
+            if (octave < -1) octave = -1; // Clamp lower octave to C-1
+
+            if (octave > 8) octave = 8; // Clamp higher octave to C8 (or whatever highest desired)
+
+
+
+            const noteIndex = (roundedMidiNote % 12 + 12) % 12; // Ensure positive modulo result
+
+            return noteNames[noteIndex] + octave;
+
+        }
+
+
+
+        /**
+
+         * Plays a specified MIDI note using multiple OscillatorNodes for a piano-like sound.
+
+         * Includes a simple ADSR envelope for decay.
+
+         * @param {number} midiNote - The MIDI note to play.
+
+         */
+
+        function playNote(midiNote) {
+
+            // Stop any currently active oscillators
+
+            activeOscillators.forEach(osc => {
+
+                try {
+
+                    osc.stop();
+
+                    osc.disconnect();
+
+                } catch (e) {
+
+                    console.warn("Error stopping oscillator:", e);
+
+                }
+
+            });
+
+            activeOscillators = [];
+
+
+
+            if (!audioContext) {
+
+                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+            }
+
+
+
+            const now = audioContext.currentTime;
+
+            const fundamentalFreq = midiToFreq(midiNote);
+
+
+
+            // Master gain for the note
+
+            const masterGain = audioContext.createGain();
+
+            masterGain.connect(audioContext.destination);
+
+            masterGain.gain.setValueAtTime(0, now); // Start from 0 gain
+
+
+
+            // Simple Attack-Decay-Sustain-Release (ADSR) envelope
+
+            const attackTime = 0.02; // Quick attack
+
+            const decayTime = 0.5;   // Medium decay
+
+            const sustainLevel = 0.3; // Sustain at 30% of max
+
+            const releaseTime = 1.0;  // Long release for piano-like tail
+
+
+
+            // Attack
+
+            masterGain.gain.linearRampToValueAtTime(0.7, now + attackTime);
+
+            // Decay
+
+            masterGain.gain.linearRampToValueAtTime(sustainLevel * 0.7, now + attackTime + decayTime);
+
+
+
+            // Create multiple oscillators for richer timbre (additive synthesis)
+
+            // Fundamental (using triangle for a softer piano sound)
+
+            const osc1 = audioContext.createOscillator();
+
+            osc1.type = 'triangle'; // Changed to triangle for softer tone
+
+            osc1.frequency.value = fundamentalFreq;
+
+            osc1.connect(masterGain);
+
+            osc1.start(now);
+
+            activeOscillators.push(osc1);
+
+
+
+            // Octave higher (subtle sine for brightness)
+
+            const osc2 = audioContext.createOscillator();
+
+            osc2.type = 'sine';
+
+            osc2.frequency.value = fundamentalFreq * 2;
+
+            const gain2 = audioContext.createGain();
+
+            gain2.gain.value = 0.2; // Slightly reduced volume for brightness
+
+            osc2.connect(gain2).connect(masterGain);
+
+            osc2.start(now);
+
+            activeOscillators.push(osc2);
+
+
+
+            // Fifth higher (even more subtle sine)
+
+            const osc3 = audioContext.createOscillator();
+
+            osc3.type = 'sine';
+
+            osc3.frequency.value = fundamentalFreq * 1.5; // Approx perfect fifth
+
+            const gain3 = audioContext.createGain();
+
+            gain3.gain.value = 0.1; // Further reduced volume
+
+            osc3.connect(gain3).connect(masterGain);
+
+            osc3.start(now);
+
+            activeOscillators.push(osc3);
+
+
+
+
+
+            // Schedule the release and stop of oscillators
+
+            const noteDuration = 1.5; // Total active duration before release starts
+
+            masterGain.gain.linearRampToValueAtTime(0.0001, now + noteDuration + releaseTime); // Release
+
+            
+
+            // Stop all oscillators after total duration + a bit of buffer
+
+            activeOscillators.forEach(osc => {
+
+                osc.stop(now + noteDuration + releaseTime + 0.1);
+
+            });
+
+        }
+
+
+
+        /**
+
+         * Pitch detection using a simplified Autocorrelation method.
+
+         * This algorithm attempts to find the fundamental frequency by correlating the signal with itself at various lags.
+
+         * It prioritizes stronger correlations within a typical human vocal range.
+
+         * @param {Float32Array} audioBuffer - Time domain audio data (e.g., from `event.inputBuffer.getChannelData(0)`).
+
+         * @param {number} sampleRate - AudioContext sample rate.
+
+         * @returns {number} Detected frequency in Hz, or 0 if no reliable pitch is found.
+
+         */
+
+        function detectPitchAutocorrelation(audioBuffer, sampleRate) {
+
+            const bufferLength = audioBuffer.length;
+
+            const MIN_FREQ = 80;  // Hz: Minimum expected human vocal frequency (approx G2)
+
+            const MAX_FREQ = 700; // Hz: Maximum expected human vocal frequency (approx F5, higher for sopranos)
+
+            const maxCorrelation = new Array(bufferLength).fill(0);
+
+
+
+            // Compute the autocorrelation values for different lags.
+
+            // Autocorrelation at lag 'i' measures how similar the signal is to itself when shifted by 'i' samples.
+
+            for (let i = 0; i < bufferLength; i++) {
+
+                for (let j = 0; j < bufferLength - i; j++) {
+
+                    maxCorrelation[i] += audioBuffer[j] * audioBuffer[j + i];
+
+                }
+
+            }
+
+
+
+            // Find the strongest peak in the correlation buffer that corresponds to a human vocal pitch.
+
+            // We ignore initial lags (small 'i') because they correspond to high frequencies which might be noise
+
+            // or the signal's own energy, not its fundamental periodicity.
+
+            let peakIndex = -1;
+
+            let maxVal = -1;
+
+            
+
+            // Calculate the minimum and maximum lag values corresponding to the MIN_FREQ and MAX_FREQ.
+
+            // Lag = Sample Rate / Frequency. Higher frequency = smaller lag. Lower frequency = larger lag.
+
+            const minLag = sampleRate / MAX_FREQ; // Smallest lag to search (for highest vocal frequency)
+
+            const maxLag = sampleRate / MIN_FREQ; // Largest lag to search (for lowest vocal frequency)
+
+
+
+            // Iterate through the relevant lag range to find the strongest correlation peak.
+
+            for (let i = Math.floor(minLag); i <= Math.floor(maxLag); i++) {
+
+                // Ensure 'i' is a valid index
+
+                if (i >= 0 && i < bufferLength) {
+
+                    if (maxCorrelation[i] > maxVal) {
+
+                        maxVal = maxCorrelation[i];
+
+                        peakIndex = i;
+
+                    }
+
+                }
+
+            }
+
+
+
+            // Confidence threshold: The strength of the detected peak must be a significant fraction
+
+            // of the signal's total energy (represented by autocorrelation at lag 0).
+
+            // A lower threshold (e.g., 0.2) makes it more sensitive but potentially prone to picking up noise.
+
+            // A higher threshold (e.g., 0.7) makes it more robust but might miss softer or less clear voices.
+
+            const correlationConfidenceThreshold = 0.3; // Adjusted to be more forgiving for real-time human voice input
+
+            
+
+            // If no valid peak was found, or the peak is not strong enough relative to the total signal energy,
+
+            // or if the signal has no energy (maxCorrelation[0] is zero, indicating silence), return 0.
+
+            if (peakIndex === -1 || maxCorrelation[0] === 0 || maxVal < (correlationConfidenceThreshold * maxCorrelation[0])) {
+
+                return 0; // No reliable pitch detected or too quiet/noisy
+
+            }
+
+
+
+            // Refine the peak estimation using parabolic interpolation for better sub-sample accuracy.
+
+            // This helps in getting a more precise frequency value than just integer lag.
+
+            if (peakIndex > 0 && peakIndex < bufferLength - 1) {
+
+                const s0 = maxCorrelation[peakIndex - 1]; // Value at previous lag
+
+                const s1 = maxCorrelation[peakIndex];     // Value at peak lag
+
+                const s2 = maxCorrelation[peakIndex + 1]; // Value at next lag
+
+                // Parabolic interpolation formula to find a more precise peak location (non-integer).
+
+                peakIndex += (s0 - s2) / (2 * (s0 - 2 * s1 + s2));
+
+            }
+
+
+
+            // Calculate the detected frequency using the refined peak index.
+
+            const detectedFrequency = sampleRate / peakIndex;
+
+
+
+            // Final check to ensure the detected frequency is within the expected human vocal range.
+
+            if (detectedFrequency < MIN_FREQ || detectedFrequency > MAX_FREQ) {
+
+                return 0; // Out of valid range, likely noise or artifact
+
+            }
+
+
+
+            return detectedFrequency;
+
+        }
+
+
+
+
+
+        /**
+
+         * Updates the volume meter bar based on the microphone input.
+
+         */
+
+        function updateVolumeMeter() {
+
+            if (!analyser) return;
+
+
+
+            const bufferLength = analyser.fftSize; // Use fftSize for time domain data
+
+            const dataArray = new Uint8Array(bufferLength); // Unsigned byte for time domain
+
+            analyser.getByteTimeDomainData(dataArray); // Get the raw waveform data
+
+
+
+            let sumSquares = 0;
+
+            for (let i = 0; i < bufferLength; i++) {
+
+                let value = dataArray[i] - 128; // Center the values around 0 (midpoint of 0-255)
+
+                sumSquares += value * value;
+
+            }
+
+            let rms = Math.sqrt(sumSquares / bufferLength); // Calculate RMS (Root Mean Square)
+
+
+
+            // Normalize RMS to a 0-100% range for the volume bar.
+
+            // The maximum theoretical RMS for an 8-bit signal is around 90.
+
+            // Scaling by 60 provides a good visual range for typical voice levels.
+
+            let volumePercentage = Math.min(100, (rms / 60) * 100); // Scale 0-60 RMS to 0-100%
+
+            volumeBar.style.width = `${volumePercentage}%`;
+
+        }
+
+
+
+        /**
+
+         * Updates the pitch indicator marker position.
+
+         * @param {number} detectedMidi - The MIDI note detected from the microphone.
+
+         * @param {number} targetMidi - The target MIDI note for the current level.
+
+         * @param {number} tolerance - The difficulty tolerance in semitones.
+
+         */
+
+        function updatePitchIndicator(detectedMidi, targetMidi, tolerance) {
+
+            if (!pitchMarker || !pitchIndicatorContainer) return;
+
+
+
+            // If in tuner mode, targetMidi doesn't exist for the game logic.
+
+            // We can define a fixed "reference" MIDI note for the tuner's visual range, e.g., C4 (60).
+
+            const referenceMidi = tunerModeActive ? 60 : targetMidi;
+
+
+
+            // Define the visual range for the indicator, e.g., +/- 2 semitones around the target
+
+            const visualRangeSemis = 2; // +/- 2 semitones from center of the visual indicator
+
+            // This range should be relative to the *target* note in game mode, or a *reference* note in tuner mode.
+
+
+
+            // Calculate the deviation from the reference MIDI note (or target MIDI note in game mode)
+
+            const deviation = detectedMidi - referenceMidi;
+
+
+
+            // Normalize the deviation to a 0-1 range for positioning the marker
+
+            // Map the deviation from [-visualRangeSemis, visualRangeSemis] to [0, 1]
+
+            let normalizedPosition = (deviation + visualRangeSemis) / (2 * visualRangeSemis);
+
+            normalizedPosition = Math.max(0, Math.min(1, normalizedPosition)); // Clamp between 0 and 1
+
+
+
+            // Convert to percentage for CSS left property
+
+            const positionPercent = normalizedPosition * 100;
+
+
+
+            pitchMarker.style.left = `${positionPercent}%`;
+
+
+
+            // Change marker color based on accuracy relative to target (only relevant in game mode)
+
+            if (gameRunning) {
+
+                const targetMidiLowerOctave = targetMidi - 12;
+
+                const targetMidiHigherOctave = targetMidi + 12;
+
+                // Two octaves lower/higher (24 semitones)
+
+                const targetMidiLower24 = targetMidi - 24;
+
+                const targetMidiHigher24 = targetMidi + 24;
+
+
+
+                const isCorrectPitch =
+
+                    (Math.abs(detectedMidi - targetMidi) <= tolerance) || // Exact pitch
+
+                    (Math.abs(detectedMidi - targetMidiLowerOctave) <= tolerance) || // One octave lower
+
+                    (Math.abs(detectedMidi - targetMidiHigherOctave) <= tolerance) || // One octave higher
+
+                    (Math.abs(detectedMidi - targetMidiLower24) <= tolerance) || // Two octaves lower
+
+                    (Math.abs(detectedMidi - targetMidiHigher24) <= tolerance); // Two octaves higher
+
+
+
+                if (isCorrectPitch) {
+
+                    pitchMarker.style.backgroundColor = '#4CAF50'; // Green (Correct)
+
+                } else if (
+
+                    (Math.abs(detectedMidi - targetMidi) <= (tolerance + 1)) || // Slightly outside tolerance for target
+
+                    (Math.abs(detectedMidi - targetMidiLowerOctave) <= (tolerance + 1)) || // Slightly outside tolerance for lower octave
+
+                    (Math.abs(detectedMidi - targetMidiHigherOctave) <= (tolerance + 1)) || // Slightly outside tolerance for higher octave
+
+                    (Math.abs(detectedMidi - targetMidiLower24) <= (tolerance + 1)) || // Slightly outside tolerance for two octaves lower
+
+                    (Math.abs(detectedMidi - targetMidiHigher24) <= (tolerance + 1)) // Slightly outside tolerance for two octaves higher
+
+                ) {
+
+                    pitchMarker.style.backgroundColor = '#FFEB3B'; // Yellow (Close)
+
+                } else {
+
+                    pitchMarker.style.backgroundColor = '#F44336'; // Red (Far)
+
+                }
+
+            } else { // Tuner mode, no specific target to be "correct"
+
+                // Simple color logic for tuner: green for "around A4", yellow for close, red for far
+
+                const tunerCenterMidi = 69; // A4
+
+                const tunerCloseTolerance = 0.5; // +/- 0.5 semitones for "green"
+
+                const tunerFarTolerance = 2; // +/- 2 semitones for "yellow"
+
+                const absDevTuner = Math.abs(detectedMidi - tunerCenterMidi);
+
+
+
+                if (absDevTuner <= tunerCloseTolerance) {
+
+                    pitchMarker.style.backgroundColor = '#4CAF50'; // Green
+
+                } else if (absDevTuner <= tunerFarTolerance) {
+
+                    pitchMarker.style.backgroundColor = '#FFEB3B'; // Yellow
+
+                } else {
+
+                    pitchMarker.style.backgroundColor = '#F44336'; // Red
+
+                }
+
+            }
+
+        }
+
+
+
+
+
+        /**
+
+         * Initializes microphone input and Web Audio API components.
+
+         */
+
+        async function setupMicrophone() {
+
+            if (microphone) {
+
+                if (audioContext && audioContext.state === 'suspended') {
+
+                    await audioContext.resume();
+
+                }
+
+                return; // Already set up
+
+            }
+
+
+
+            try {
+
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                microphone = audioContext.createMediaStreamSource(stream);
+
+
+
+                analyser = audioContext.createAnalyser();
+
+                analyser.fftSize = 2048; // Size of FFT window for frequency data
+
+                analyser.minDecibels = -90; // Minimum decibels for range
+
+                analyser.maxDecibels = -10; // Maximum decibels for range
+
+                analyser.smoothingTimeConstant = 0.85; // Smooths out the visualization
+
+
+
+                scriptProcessor = audioContext.createScriptProcessor(4096, 1, 1); // bufferSize, inputChannels, outputChannels
+
+
+
+                microphone.connect(analyser); // Connect microphone to analyser
+
+                analyser.connect(scriptProcessor); // Connect analyser to scriptProcessor for data access
+
+                scriptProcessor.connect(audioContext.destination); // Connect scriptProcessor to audio destination (required for onaudioprocess to fire consistently)
+
+
+
+                scriptProcessor.onaudioprocess = (event) => {
+
+                    // This function runs whenever the audio input buffer is processed.
+
+                    if (!guessMode) { // Only process microphone input if not in guess mode
+
+                        updateVolumeMeter(); // Update the volume bar visually
+
+
+
+                        const buffer = event.inputBuffer.getChannelData(0); // Get audio data from the first channel
+
+                        const sampleRate = audioContext.sampleRate; // Get current audio context sample rate
+
+
+
+                        const frequency = detectPitchAutocorrelation(buffer, sampleRate); // Use the improved pitch detection
+
+                        if (frequency > 0) {
+
+                            const detectedMidi = freqToMidi(frequency);
+
+                            detectedNoteDisplay.textContent = midiNoteToName(detectedMidi); // Display detected note
+
+                            updatePitchIndicator(detectedMidi, targetMidiNote, currentTolerance); // Update pitch indicator
+
+
+
+                            // Only check for game passing/failing if in game mode, actively running, and countdown is active
+
+                            if (gameRunning && countdownValue > 0) {
+
+                                checkPitch(detectedMidi);
+
+                            }
+
+                        } else {
+
+                            detectedNoteDisplay.textContent = '--'; // Display '--' if no pitch is detected
+
+                            pitchMarker.style.left = '50%'; // Reset marker to center
+
+                            pitchMarker.style.backgroundColor = '#fff'; // Reset color
+
+                        }
+
+                    }
+
+                };
+
+                micStatusDisplay.classList.add('hidden'); // Hide microphone status warning
+
+                startGameBtn.disabled = false; // Enable the start game button
+
+                startTunerBtn.disabled = false; // Enable the tuner button
+
+                volumeMeter.classList.remove('hidden'); // Show the volume meter
+
+                pitchIndicatorContainer.classList.remove('hidden'); // Show pitch indicator
+
+            } catch (err) {
+
+                console.error("無法獲取麥克風權限:", err);
+
+                micStatusDisplay.classList.remove('hidden'); // Show microphone warning
+
+                micStatusDisplay.textContent = '無法獲取麥克風權限，請檢查瀏覽器設定。';
+
+                startGameBtn.disabled = true; // Disable start game button if mic access fails
+
+                startTunerBtn.disabled = true; // Disable tuner button if mic access fails
+
+                volumeMeter.classList.add('hidden'); // Hide volume meter
+
+                pitchIndicatorContainer.classList.add('hidden'); // Hide pitch indicator
+
+            }
+
+        }
+
+
+
+        /**
+
+         * Sets the game difficulty based on user selection.
+
+         */
+
+        function setDifficulty() {
+
+            const selectedDifficulty = document.querySelector('input[name="difficulty"]:checked').value;
+
+            currentTolerance = difficultyTolerance[selectedDifficulty];
+
+            // Set the countdown duration based on difficulty
+
+            countdownDisplay.textContent = difficultyCountdown[selectedDifficulty];
+
+            console.log(`難易度設定為: ${selectedDifficulty}, 容忍度: ${currentTolerance} 半音, 倒數: ${difficultyCountdown[selectedDifficulty]} 秒`);
+
+        }
+
+
+
+        /**
+
+         * Resets UI elements specific to mic input display.
+
+         */
+
+        function resetMicDisplay() {
+
+            detectedNoteDisplay.textContent = '--';
+
+            pitchMarker.style.left = '50%';
+
+            pitchMarker.style.backgroundColor = '#fff';
+
+            volumeBar.style.width = '0%';
+
+        }
+
+
+
+        /**
+
+         * Starts a new game or restarts an existing one.
+
+         */
+
+        function startGame() {
+
+            tunerModeActive = false; // Ensure tuner mode is off
+
+            gameRunning = true; // Set game state to running
+
+
+
+            setDifficulty(); // Set difficulty for game mode, which also sets initial countdown
+
+            guessMode = guessModeToggle.checked; // Check guess mode state
+
+
+
+            // Show/hide relevant elements for game mode
+
+            micInputArea.classList.toggle('hidden', guessMode);
+
+            guessModeArea.classList.toggle('hidden', !guessMode);
+
+            targetNoteDisplay.classList.remove('hidden');
+
+            targetNoteLabel.classList.remove('hidden');
+
+            countdownDisplay.classList.toggle('hidden', guessMode); // Countdown only in mic game mode
+
+            progressBar.classList.remove('hidden'); // Show progress bar
+
+            currentLevelText.classList.remove('hidden'); // Show level text
+
+            playNoteBtn.classList.remove('hidden'); // Show play note button
+
+            returnToMainBtn.classList.add('hidden'); // Hide return button in game mode
+
+
+
+            // Show/hide mic indicators if mic mode is active
+
+            volumeMeter.classList.toggle('hidden', guessMode);
+
+            pitchIndicatorContainer.classList.toggle('hidden', guessMode);
+
+
+
+            startScreen.classList.add('hidden');
+
+            gameScreen.classList.remove('hidden');
+
+            endScreen.classList.add('hidden');
+
+
+
+            modeDisplay.textContent = '遊戲模式:'; // Update mode display
+
+            currentLevel = 0;
+
+            score = 0;
+
+            resetMicDisplay(); // Reset mic display
+
+            nextLevel();
+
+        }
+
+
+
+        /**
+
+         * Starts the Tuner Mode.
+
+         */
+
+        async function startTunerMode() {
+
+            tunerModeActive = true;
+
+            gameRunning = false; // Ensure game mode is off
+
+            guessMode = false; // Tuner mode always uses mic
+
+
+
+            // Stop any active countdown from previous game if it was running
+
+            if (countdownTimer) {
+
+                clearInterval(countdownTimer);
+
+            }
+
+            countdownDisplay.classList.add('hidden'); // Always hide countdown in tuner mode
+
+
+
+            // Show/hide relevant elements for tuner mode
+
+            micInputArea.classList.remove('hidden');
+
+            guessModeArea.classList.add('hidden'); // Hide guess mode if somehow active
+
+            targetNoteDisplay.classList.add('hidden'); // Hide target note in tuner mode
+
+            targetNoteLabel.classList.add('hidden');
+
+            progressBar.classList.add('hidden'); // Hide progress bar
+
+            currentLevelText.classList.add('hidden'); // Hide level text
+
+            playNoteBtn.classList.add('hidden'); // Hide play note button
+
+            returnToMainBtn.classList.remove('hidden'); // Show return button in tuner mode
+
+
+
+            volumeMeter.classList.remove('hidden');
+
+            pitchIndicatorContainer.classList.remove('hidden');
+
+
+
+            startScreen.classList.add('hidden');
+
+            gameScreen.classList.remove('hidden');
+
+            endScreen.classList.add('hidden');
+
+
+
+            modeDisplay.textContent = '調音器模式'; // Update mode display
+
+            resetMicDisplay(); // Reset mic display for tuner
+
+            feedbackMessage.textContent = ''; // Clear feedback
+
+
+
+            await setupMicrophone(); // Ensure mic is set up for tuner
+
+            // No levels or countdown in tuner mode, just continuous detection.
+
+        }
+
+
+
+        /**
+
+         * Proceeds to the next game level.
+
+         */
+
+        function nextLevel() {
+
+            // If in tuner mode, don't proceed with game levels.
+
+            if (tunerModeActive) {
+
+                return;
+
+            }
+
+
+
+            currentLevel++;
+
+            if (currentLevel > 10) {
+
+                endGame(); // If all levels completed, end game
+
+                return;
+
+            }
+
+
+
+            // Clear any active countdown timer
+
+            if (countdownTimer) {
+
+                clearInterval(countdownTimer);
+
+            }
+
+
+
+            // Reset UI for new level
+
+            feedbackMessage.textContent = '';
+
+            feedbackMessage.className = 'feedback-message mt-6';
+
+            resetMicDisplay(); // Reset mic display
+
+
+
+
+
+            currentLevelText.textContent = `第 ${currentLevel} / 10 關`; // Update current level display
+
+            progressBar.style.width = `${(currentLevel - 1) * 10}%`; // Update progress bar
+
+
+
+            targetMidiNote = Math.floor(Math.random() * (72 - 48 + 1)) + 48; // Generate a random MIDI note (C3 to C5)
+
+            if (!guessMode) {
+
+                targetNoteDisplay.textContent = midiNoteToName(targetMidiNote); // Display target note in mic mode
+
+            } else {
+
+                targetNoteDisplay.textContent = '???'; // Hide target note in guess mode
+
+            }
+
+
+
+            playNoteBtn.disabled = false; // Enable play note button
+
+            if (!guessMode) {
+
+                // Get countdown duration based on current difficulty
+
+                const selectedDifficulty = document.querySelector('input[name="difficulty"]:checked').value;
+
+                startCountdown(difficultyCountdown[selectedDifficulty]);
+
+            } else {
+
+                generateGuessOptions(); // Generate guess options for guess mode
+
+            }
+
+
+
+            // Auto-play the note on new level to let the user hear it
+
+            playNote(targetMidiNote);
+
+        }
+
+
+
+        /**
+
+         * Starts the countdown for pitch detection based on difficulty.
+
+         * @param {number} duration - The duration of the countdown in seconds.
+
+         */
+
+        function startCountdown(duration) {
+
+            countdownValue = duration;
+
+            countdownDisplay.textContent = countdownValue;
+
+            countdownDisplay.classList.remove('hidden'); // Ensure countdown is visible
+
+
+
+            if (countdownTimer) {
+
+                clearInterval(countdownTimer); // Clear any existing timer
+
+            }
+
+
+
+            countdownTimer = setInterval(() => {
+
+                countdownValue--;
+
+                countdownDisplay.textContent = countdownValue;
+
+
+
+                if (countdownValue <= 0) {
+
+                    clearInterval(countdownTimer); // Stop countdown
+
+                    countdownDisplay.classList.add('hidden'); // Hide countdown
+
+                    if (gameRunning) { // If game is still running (i.e., not already passed)
+
+                        showFailFeedback("時間到！"); // Fail due to timeout
+
+                    }
+
+                }
+
+            }, 1000); // Update every 1 second
+
+        }
+
+
+
+        /**
+
+         * Checks if the detected pitch from microphone matches the target pitch or its octaves.
+
+         * This function is called continuously from `scriptProcessor.onaudioprocess` when in mic mode.
+
+         * @param {number} detectedMidi - The MIDI note detected from the microphone.
+
+         */
+
+        function checkPitch(detectedMidi) {
+
+            // Only check for passing/failing if the game is running and countdown is active.
+
+            if (!gameRunning || countdownValue <= 0 || tunerModeActive) return;
+
+
+
+            const targetMidiLowerOctave = targetMidiNote - 12; // One octave lower
+
+            const targetMidiHigherOctave = targetMidiNote + 12; // One octave higher
+
+            // Two octaves lower/higher (24 semitones)
+
+            const targetMidiLower24 = targetMidiNote - 24; // Two octaves lower (Major 17th)
+
+            const targetMidiHigher24 = targetMidiNote + 24; // Two octaves higher (Major 17th)
+
+
+
+            const tolerance = currentTolerance; // Use the configured difficulty tolerance
+
+
+
+            // Check if the detected MIDI note is within a reasonable human vocal range
+
+            if (detectedMidi > 0 && detectedMidi >= 30 && detectedMidi <= 90) { // MIDI notes roughly corresponding to G1 to C6
+
+                // Check against the exact target note and its octaves
+
+                const isCorrectPitch =
+
+                    (Math.abs(detectedMidi - targetMidiNote) <= tolerance) || // Exact pitch
+
+                    (Math.abs(detectedMidi - targetMidiLowerOctave) <= tolerance) || // One octave lower
+
+                    (Math.abs(detectedMidi - targetMidiHigherOctave) <= tolerance) || // One octave higher
+
+                    (Math.abs(detectedMidi - targetMidiLower24) <= tolerance) || // Two octaves lower
+
+                    (Math.abs(detectedMidi - targetMidiHigher24) <= tolerance); // Two octaves higher
+
+                    
+
+                if (isCorrectPitch) {
+
+                    showSuccessFeedback(); // Pitch is correct (within tolerance for target or its octaves)
+
+                } else {
+
+                    // In this continuous detection setup, immediate "fail" feedback for wrong pitch
+
+                    // during the countdown might be too disruptive. Failure is primarily determined by timeout
+
+                    // or a wrong guess in guess mode.
+
+                }
+
+            }
+
+        }
+
+
+
+        /**
+
+         * Generates and displays guess options for the guess pitch mode.
+
+         */
+
+        function generateGuessOptions() {
+
+            const options = [];
+
+            options.push(targetMidiNote); // The correct answer is always one of the options
+
+
+
+            // Generate two incorrect but plausible options to make it a 3-choice quiz.
+
+            while (options.length < 3) {
+
+                let randomOffset = Math.floor(Math.random() * 5) + 1; // Offset by 1 to 5 semitones
+
+                let sign = Math.random() < 0.5 ? 1 : -1; // Randomly choose higher or lower
+
+                let incorrectMidi = targetMidiNote + (randomOffset * sign);
+
+
+
+                // Ensure the incorrect note is within a reasonable playable range (C3 to C5 for consistency)
+
+                if (incorrectMidi < 48) incorrectMidi = 48 + randomOffset; // Adjust if too low
+
+                if (incorrectMidi > 72) incorrectMidi = 72 - randomOffset; // Adjust if too high
+
+
+
+                // Ensure the generated incorrect note is not a duplicate and is actually different from the target.
+
+                if (!options.includes(incorrectMidi) && incorrectMidi !== targetMidiNote) {
+
+                    options.push(incorrectMidi);
+
+                }
+
+            }
+
+
+
+            // Shuffle the options to randomize their display order on buttons
+
+            options.sort(() => Math.random() - 0.5);
+
+
+
+            const guessOptionButtons = document.querySelectorAll('.guess-option-btn');
+
+            guessOptionButtons.forEach((button, index) => {
+
+                const midi = options[index];
+
+                button.textContent = midiNoteToName(midi); // Set button text to note name
+
+                button.dataset.midiNote = midi; // Store MIDI note as data attribute
+
+                button.onclick = () => checkGuess(midi); // Assign click event handler
+
+                button.disabled = false; // Ensure buttons are enabled for new turn
+
+            });
+
+        }
+
+
+
+        /**
+
+         * Checks if the user's guessed pitch is correct in guess mode.
+
+         * @param {number} selectedMidi - The MIDI note selected by the user.
+
+         */
+
+        function checkGuess(selectedMidi) {
+
+            // Disable all guess buttons after a selection to prevent multiple clicks
+
+            document.querySelectorAll('.guess-option-btn').forEach(btn => btn.disabled = true);
+
+
+
+            if (selectedMidi === targetMidiNote) {
+
+                showSuccessFeedback(); // Correct guess
+
+            } else {
+
+                showFailFeedback("猜錯了！"); // Incorrect guess (removed "請再試一次")
+
+            }
+
+        }
+
+
+
+        /**
+
+         * Shows success feedback, increments score, and prepares for the next level.
+
+         */
+
+        function showSuccessFeedback() {
+
+            score++; // Increment score
+
+            feedbackMessage.textContent = '正確！'; // Display success message
+
+            feedbackMessage.classList.remove('feedback-fail');
+
+            feedbackMessage.classList.add('feedback-success');
+
+
+
+            gameRunning = false; // Pause game logic
+
+            if (countdownTimer) { // Stop countdown if active
+
+                clearInterval(countdownTimer);
+
+                countdownDisplay.classList.add('hidden');
+
+            }
+
+            passModal.classList.remove('hidden'); // Show pass modal
+
+        }
+
+
+
+        /**
+
+         * Shows failure feedback and allows retrying the current level.
+
+         * @param {string} message - Optional message to display (e.g., "時間到！").
+
+         */
+
+        function showFailFeedback(message = "不正確。") {
+
+            feedbackMessage.textContent = message; // Display failure message
+
+            feedbackMessage.classList.remove('feedback-success');
+
+            feedbackMessage.classList.add('feedback-fail');
+
+
+
+            gameRunning = false; // Pause game logic
+
+            if (countdownTimer) { // Stop countdown if active
+
+                clearInterval(countdownTimer);
+
+                countdownDisplay.classList.add('hidden');
+
+            }
+
+            failModal.classList.remove('hidden'); // Show fail modal
+
+        }
+
+
+
+        /**
+
+         * Ends the game, displays the final score, and resets to the start screen option.
+
+         */
+
+        function endGame() {
+
+            gameRunning = false; // Stop game logic
+
+            tunerModeActive = false; // Ensure tuner mode is off
+
+            gameScreen.classList.add('hidden'); // Hide game screen
+
+            endScreen.classList.remove('hidden'); // Show end screen
+
+            finalScoreDisplay.textContent = score; // Display final score
+
+
+
+            if (countdownTimer) { // Clear any remaining countdown timer
+
+                clearInterval(countdownTimer);
+
+            }
+
+            countdownDisplay.classList.add('hidden'); // Hide countdown display
+
+
+
+            // Disconnect and clean up microphone resources if they were active
+
+            if (microphone) {
+
+                microphone.disconnect();
+
+                scriptProcessor.disconnect();
+
+                microphone = null;
+
+                scriptProcessor = null;
+
+            }
+
+            // Close and dispose of the AudioContext if it's running
+
+            if (audioContext && audioContext.state === 'running') {
+
+                audioContext.close().then(() => audioContext = null);
+
+            }
+
+        }
+
+
+
+        // --- Removed AI feedback function ---
+
+        // getAiFeedback function removed as per user request.
+
+
+
+
+
+        // --- Event Listeners ---
+
+        startGameBtn.addEventListener('click', startGame); // Start game when button clicked
+
+        startTunerBtn.addEventListener('click', startTunerMode); // Start Tuner Mode when button clicked
+
+
+
+        restartGameBtn.addEventListener('click', () => {
+
+            endScreen.classList.add('hidden');
+
+            startScreen.classList.remove('hidden'); // Go back to start screen
+
+        });
+
+        
+
+        returnFromEndBtn.addEventListener('click', () => { // New event listener for return from end screen
+
+            endScreen.classList.add('hidden');
+
+            startScreen.classList.remove('hidden');
+
+            // Ensure audio context is closed/suspended when returning to start screen
+
+            if (audioContext && audioContext.state === 'running') {
+
+                audioContext.close().then(() => audioContext = null);
+
+            }
+
+            if (microphone) {
+
+                microphone.disconnect();
+
+                microphone = null;
+
+            }
+
+            if (scriptProcessor) {
+
+                scriptProcessor.disconnect();
+
+                scriptProcessor = null;
+
+            }
+
+        });
+
+
+
+        playNoteBtn.addEventListener('click', () => {
+
+            playNote(targetMidiNote); // Play the target note
+
+            playNoteBtn.disabled = true; // Disable to prevent spamming
+
+            setTimeout(() => playNoteBtn.disabled = false, 1500); // Re-enable after 1.5 seconds
+
+        });
+
+
+
+        // Event listener for "下一關" on pass modal
+
+        nextLevelPassModalBtn.addEventListener('click', () => {
+
+            passModal.classList.add('hidden'); // Hide pass modal
+
+            gameRunning = true; // Resume game logic
+
+            nextLevel(); // Proceed to next level
+
+        });
+
+
+
+        // Event listener for "下一關" on fail modal
+
+        nextLevelFailModalBtn.addEventListener('click', () => {
+
+            failModal.classList.add('hidden'); // Hide fail modal
+
+            gameRunning = true; // Resume game logic
+
+            feedbackMessage.textContent = ''; // Clear feedback message
+
+            feedbackMessage.className = 'feedback-message mt-6'; // Reset feedback message class
+
+            // In game mode, proceed to next level on fail.
+
+            // If it was guess mode, ensure guess buttons are re-enabled for the next level.
+
+            if (guessMode) {
+
+                 document.querySelectorAll('.guess-option-btn').forEach(btn => btn.disabled = false);
+
+            }
+
+            nextLevel(); // Always go to next level on fail
+
+        });
+
+
+
+        // Event listener for "返回主頁" button in tuner mode
+
+        returnToMainBtn.addEventListener('click', () => {
+
+            gameScreen.classList.add('hidden'); // Hide game screen
+
+            startScreen.classList.remove('hidden'); // Show start screen
+
+            tunerModeActive = false; // Turn off tuner mode
+
+            // Ensure audio context is closed/suspended when returning to start screen
+
+            if (audioContext && audioContext.state === 'running') {
+
+                audioContext.close().then(() => audioContext = null);
+
+            }
+
+            if (microphone) {
+
+                microphone.disconnect();
+
+                microphone = null;
+
+            }
+
+            if (scriptProcessor) {
+
+                scriptProcessor.disconnect();
+
+                scriptProcessor = null;
+
+            }
+
+            resetMicDisplay(); // Clear mic displays
+
+        });
+
+
+
+
+
+        // Initialize microphone setup on window load to check permissions early.
+
+        // This helps provide a better user experience by asking for mic permission upfront if needed.
+
+        window.onload = function() {
+
+            // Initially disable tuner button until mic status is clear
+
+            startTunerBtn.disabled = true;
+
+            // Only attempt to set up microphone if not in guess mode (default state)
+
+            if (!guessModeToggle.checked) {
+
+                setupMicrophone(); // Attempt to setup microphone if not in guess mode
+
+            } else {
+
+                // If guess mode is checked by default, enable start button directly
+
+                startGameBtn.disabled = false;
+
+                startTunerBtn.disabled = false; // Also enable tuner button if mic is not strictly needed for initial setup
+
+            }
+
+        };
+
+
+
+        // Handle change in guess mode toggle: show/hide mic related elements and manage mic state
+
+        guessModeToggle.addEventListener('change', () => {
+
+            // If we are currently in tuner mode, switch back to start screen logic first.
+
+            // This prevents issues where mic might be active and then toggled.
+
+            if (tunerModeActive) {
+
+                returnToMainBtn.click(); // Simulate clicking the return button
+
+            }
+
+
+
+            if (guessModeToggle.checked) {
+
+                micStatusDisplay.classList.add('hidden'); // Hide mic status
+
+                startGameBtn.disabled = false; // Enable start button
+
+                // Disconnect mic if it was active and we're switching to a non-mic mode
+
+                if (microphone) {
+
+                    microphone.disconnect();
+
+                    scriptProcessor.disconnect();
+
+                    microphone = null;
+
+                    scriptProcessor = null;
+
+                }
+
+                if (audioContext && audioContext.state === 'running') {
+
+                    audioContext.suspend(); // Suspend audio context
+
+                }
+
+                // Hide mic-specific displays
+
+                countdownDisplay.classList.add('hidden');
+
+                volumeMeter.classList.add('hidden');
+
+                pitchIndicatorContainer.classList.add('hidden');
+
+            } else {
+
+                setupMicrophone(); // Setup microphone when switching back to mic mode
+
+            }
+
+        });
+
+
+
+    </script>
+
+</body>
+
+</html>
+
